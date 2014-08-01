@@ -1,0 +1,30 @@
+{
+  "name": "winattr",
+  "description": "Windows file attributes.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/stevenvachon/winattr",
+  "author": {
+    "name": "Steven Vachon",
+    "email": "contact@svachon.com",
+    "url": "http://www.svachon.com/"
+  },
+  "main": "lib",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stevenvachon/winattr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stevenvachon/winattr/issues"
+  },
+  "devDependencies": {
+    "chai": "^1.9",
+    "mocha": "^1.21",
+    "object.assign": "~0.5"
+  },
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha test/ --bail --reporter spec --check-leaks"
+  }
+}
