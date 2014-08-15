@@ -1,4 +1,4 @@
-# winattr [![NPM Version](http://badge.fury.io/js/winattr.svg)](http://badge.fury.io/js/winattr)
+# winattr [![NPM Version](http://badge.fury.io/js/winattr.svg)](http://badge.fury.io/js/winattr) [![Build Status](https://secure.travis-ci.org/stevenvachon/winattr.svg)](http://travis-ci.org/stevenvachon/winattr) [![Build status](https://ci.appveyor.com/api/projects/status/ycr7q9krha8cjojx)](https://ci.appveyor.com/project/stevenvachon/winattr)
 
 > Windows file attributes for Node.js
 
@@ -40,6 +40,6 @@ winattr.get("path/to/file.ext", function(err, data) {
 var winattr = require("winattr");
 
 winattr.set("path/to/folder/", {readonly:true}, function(err) {
-	if (!error) console.log("success");
+	if (!err) console.log("success");
 });
 ```

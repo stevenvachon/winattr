@@ -1,81 +1,29 @@
 var expect = require("chai").expect;
 var util   = require("./util");
 
-// Don't test on anything but Windows
-if (process.platform.indexOf("win") != 0) return;
+var describe_unixOnly    = eval( !util.isWindows ? "describe" : "describe.skip" );
+var describe_windowsOnly = eval(  util.isWindows ? "describe" : "describe.skip" );
 
 
 
-describe("Files", function()
+describe_unixOnly("Unix", function()
 {
-	it("should set nothing", function(done)
+	it("files should bail", function(done)
 	{
 		util.newFile("normal.txt", util.defaultAttribs(), function(error, result)
 		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
+			expect(error).to.be.not.null;
+			expect(error.message).to.contain("Windows");
 			done();
 		});
 	});
 	
-	it("should set archive", function(done)
+	it("folders should bail", function(done)
 	{
-		util.newFile("archive.txt", util.defaultAttribs({archive:true}), function(error, result)
+		util.newFolder("normal", util.defaultAttribs(), function(error, result)
 		{
-			expect(result.archive).to.be.true;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
-			done();
-		});
-	});
-	
-	it("should set hidden", function(done)
-	{
-		util.newFile("hidden.txt", util.defaultAttribs({hidden:true}), function(error, result)
-		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.true;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
-			done();
-		});
-	});
-	
-	it("should set readonly", function(done)
-	{
-		util.newFile("readonly.txt", util.defaultAttribs({readonly:true}), function(error, result)
-		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.true;
-			expect(result.system).to.be.false;
-			done();
-		});
-	});
-	
-	it("should set system", function(done)
-	{
-		util.newFile("system.txt", util.defaultAttribs({system:true}), function(error, result)
-		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.true;
-			done();
-		});
-	});
-	
-	it("should set all attributes", function(done)
-	{
-		util.newFile("all.txt", util.allAttribs(), function(error, result)
-		{
-			expect(result.archive).to.be.true;
-			expect(result.hidden).to.be.true;
-			expect(result.readonly).to.be.true;
-			expect(result.system).to.be.true;
+			expect(error).to.be.not.null;
+			expect(error.message).to.contain("Windows");
 			done();
 		});
 	});
@@ -83,77 +31,169 @@ describe("Files", function()
 
 
 
-describe("Folders", function()
+describe_windowsOnly("Windows", function()
 {
-	it("should set nothing", function(done)
+	describe("files", function()
 	{
-		util.newFolder("normal", util.defaultAttribs(), function(error, result)
+		it("should set nothing", function(done)
 		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
-			done();
+			util.newFile("normal.txt", util.defaultAttribs(), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set archive", function(done)
+		{
+			util.newFile("archive.txt", util.defaultAttribs({archive:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.true;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set hidden", function(done)
+		{
+			util.newFile("hidden.txt", util.defaultAttribs({hidden:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.true;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set readonly", function(done)
+		{
+			util.newFile("readonly.txt", util.defaultAttribs({readonly:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.true;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set system", function(done)
+		{
+			util.newFile("system.txt", util.defaultAttribs({system:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.true;
+				done();
+			});
+		});
+		
+		it("should set all attributes", function(done)
+		{
+			util.newFile("all.txt", util.allAttribs(), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.true;
+				expect(result.hidden).to.be.true;
+				expect(result.readonly).to.be.true;
+				expect(result.system).to.be.true;
+				done();
+			});
 		});
 	});
 	
-	it("should set archive", function(done)
-	{
-		util.newFolder("archive", util.defaultAttribs({archive:true}), function(error, result)
-		{
-			expect(result.archive).to.be.true;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
-			done();
-		});
-	});
 	
-	it("should set hidden", function(done)
-	{
-		util.newFolder("hidden", util.defaultAttribs({hidden:true}), function(error, result)
-		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.true;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.false;
-			done();
-		});
-	});
 	
-	it("should set readonly", function(done)
+	describe("folders", function()
 	{
-		util.newFolder("readonly", util.defaultAttribs({readonly:true}), function(error, result)
+		it("should set nothing", function(done)
 		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.true;
-			expect(result.system).to.be.false;
-			done();
+			util.newFolder("normal", util.defaultAttribs(), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
 		});
-	});
-	
-	it("should set system", function(done)
-	{
-		util.newFolder("system", util.defaultAttribs({system:true}), function(error, result)
+		
+		it("should set archive", function(done)
 		{
-			expect(result.archive).to.be.false;
-			expect(result.hidden).to.be.false;
-			expect(result.readonly).to.be.false;
-			expect(result.system).to.be.true;
-			done();
+			util.newFolder("archive", util.defaultAttribs({archive:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.true;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
 		});
-	});
-	
-	it("should set all attributes", function(done)
-	{
-		util.newFolder("all", util.allAttribs(), function(error, result)
+		
+		it("should set hidden", function(done)
 		{
-			expect(result.archive).to.be.true;
-			expect(result.hidden).to.be.true;
-			expect(result.readonly).to.be.true;
-			expect(result.system).to.be.true;
-			done();
+			util.newFolder("hidden", util.defaultAttribs({hidden:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.true;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set readonly", function(done)
+		{
+			util.newFolder("readonly", util.defaultAttribs({readonly:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.true;
+				expect(result.system).to.be.false;
+				done();
+			});
+		});
+		
+		it("should set system", function(done)
+		{
+			util.newFolder("system", util.defaultAttribs({system:true}), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.false;
+				expect(result.hidden).to.be.false;
+				expect(result.readonly).to.be.false;
+				expect(result.system).to.be.true;
+				done();
+			});
+		});
+		
+		it("should set all attributes", function(done)
+		{
+			util.newFolder("all", util.allAttribs(), function(error, result)
+			{
+				if (error) throw error;
+				expect(result.archive).to.be.true;
+				expect(result.hidden).to.be.true;
+				expect(result.readonly).to.be.true;
+				expect(result.system).to.be.true;
+				done();
+			});
 		});
 	});
 });
