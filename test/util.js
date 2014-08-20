@@ -1,8 +1,7 @@
 var fs = require("fs");
 var resolve = require("path").resolve;
 var winattr = require("../lib");
-
-if (!Object.assign) Object.assign = require("object.assign");
+require("object.assign").shim();
 
 var windows = process.platform.indexOf("win") == 0;
 
@@ -25,31 +24,6 @@ function allAttribs()
 
 
 
-function attribs(path, attrs, callback)
-{
-	if (typeof attrs == "function")
-	{
-		callback = attrs;
-		attrs = null;
-	}
-	
-	if (attrs)
-	{
-		winattr.set(path, attrs, function(error)
-		{
-			if (error) return callback(error);
-			
-			winattr.get(path, callback);
-		});
-	}
-	else
-	{
-		winattr.get(path, callback);
-	}
-}
-
-
-
 function defaultAttribs(overrides)
 {
 	var defaults =
@@ -60,19 +34,12 @@ function defaultAttribs(overrides)
 		system: false
 	};
 	
-	if (overrides)
-	{
-		return Object.assign(defaults, overrides);
-	}
-	else
-	{
-		return defaults;
-	}
+	return overrides ? Object.assign(defaults,overrides) : defaults;
 }
 
 
 
-function newFile(path, attrs, callback)
+function newFile(path, attrs1, lib, callback)
 {
 	path = resolve(__dirname, path);
 	
@@ -80,15 +47,17 @@ function newFile(path, attrs, callback)
 	{
 		if (writeError) return callback(writeError);
 		
-		attribs(path, attrs, function(attribsError, attrs)
+		switchLib(lib);
+		
+		setget(path, attrs1, function(setgetError, attrs)
 		{
-			// Set attribs to false to avoid EPERM issues when deleting
+			// Set attributes to false to avoid EPERM issues when deleting
 			winattr.set(path, defaultAttribs(), function(winattrError)
 			{
 				// Remove test file
 				fs.unlink(path, function(unlinkError)
 				{
-					callback(unlinkError || winattrError || attribsError || null, attrs);
+					callback(unlinkError || winattrError || setgetError || null, attrs);
 				});
 			});
 		});
@@ -97,7 +66,7 @@ function newFile(path, attrs, callback)
 
 
 
-function newFolder(path, attrs, callback)
+function newFolder(path, attrs, lib, callback)
 {
 	path = resolve(__dirname, path);
 	
@@ -105,19 +74,53 @@ function newFolder(path, attrs, callback)
 	{
 		if (mkError) return callback(mkError);
 		
-		attribs(path, attrs, function(attribsError, attrs)
+		switchLib(lib);
+		
+		setget(path, attrs, function(setgetError, attrs)
 		{
-			// Set attribs to false to avoid EPERM issues when deleting
+			// Set attributes to false to avoid EPERM issues when deleting
 			winattr.set(path, defaultAttribs(), function(winattrError)
 			{
 				// Remove test dir
 				fs.rmdir(path, function(rmError)
 				{
-					callback(rmError || winattrError || attribsError || null, attrs);
+					callback(rmError || winattrError || setgetError || null, attrs);
 				});
 			});
 		});
 	});
+}
+
+
+
+function setget(path, attrs, callback)
+{
+	winattr.set(path, attrs, function(error)
+	{
+		if (error) return callback(error);
+		
+		winattr.get(path, callback);
+	});
+}
+
+
+
+function switchLib(lib)
+{
+	switch (lib)
+	{
+		case "":
+		case "exec":
+		{
+			winattr.useExec();
+			break;
+		}
+		case "native":
+		{
+			winattr.useNative();
+			break;
+		}
+	}
 }
 
 

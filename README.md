@@ -1,4 +1,4 @@
-# winattr [![NPM Version](http://badge.fury.io/js/winattr.svg)](http://badge.fury.io/js/winattr) [![Build Status](https://secure.travis-ci.org/stevenvachon/winattr.svg)](http://travis-ci.org/stevenvachon/winattr) [![Build status](https://ci.appveyor.com/api/projects/status/ycr7q9krha8cjojx)](https://ci.appveyor.com/project/stevenvachon/winattr)
+# winattr [![NPM Version](http://badge.fury.io/js/winattr.svg)](http://badge.fury.io/js/winattr) [![Build Status](https://secure.travis-ci.org/stevenvachon/winattr.svg)](http://travis-ci.org/stevenvachon/winattr) [![Build status](https://ci.appveyor.com/api/projects/status/ycr7q9krha8cjojx)](https://ci.appveyor.com/project/stevenvachon/winattr) [![Dependency Status](https://david-dm.org/stevenvachon/winattr.svg)](https://david-dm.org/stevenvachon/winattr)
 
 > Windows file attributes for Node.js
 
@@ -43,3 +43,27 @@ winattr.set("path/to/folder/", {readonly:true}, function(err) {
 	if (!err) console.log("success");
 });
 ```
+
+#### useExec()
+Switch back from using the native binding in case of error (most likely caused by V8 API changes). This is loaded by default.  
+```js
+var winattr = require("winattr");
+
+try {
+	winattr.useNative();
+} catch (err) {
+	winattr.useExec();
+}
+```
+
+#### useNative()
+Use native binding offering **far greater performance** over the default `useExec()`.  
+```js
+var winattr = require("winattr").useNative();
+```
+
+## Changelog
+* 0.2.0 added [fswin](https://npmjs.org/package/fswin),`useExec()`,`useNative()`
+* 0.1.2 tested on Windows
+* 0.1.1 package.json optimization
+* 0.1.0 initial release

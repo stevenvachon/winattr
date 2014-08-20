@@ -1,7 +1,7 @@
 {
   "name": "winattr",
   "description": "Windows file attributes.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "https://github.com/stevenvachon/winattr",
   "author": {
     "name": "Steven Vachon",
@@ -16,10 +16,13 @@
   "bugs": {
     "url": "https://github.com/stevenvachon/winattr/issues"
   },
+  "dependencies": {
+    "fswin-binary": "~0.1"
+  },
   "devDependencies": {
     "chai": "^1.9",
     "mocha": "^1.21",
-    "object.assign": "~0.5"
+    "object.assign": "^1.0"
   },
   "engines": {
     "node": ">= 0.10"
@@ -35,6 +38,8 @@
     "file",
     "fs",
     "fs-stat",
+    "native",
+    "ntfs",
     "windows"
   ]
 }
