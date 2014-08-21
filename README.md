@@ -63,6 +63,7 @@ var winattr = require("winattr").useNative();
 ```
 
 ## Changelog
+* 0.2.1 nearly pointless fix
 * 0.2.0 added [fswin](https://npmjs.org/package/fswin),`useExec()`,`useNative()`
 * 0.1.2 tested on Windows
 * 0.1.1 package.json optimization
