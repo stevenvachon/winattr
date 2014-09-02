@@ -1,8 +1,9 @@
-var expect = require("chai").expect;
-var util   = require("./util");
+var expect  = require("chai").expect;
+var util    = require("./util");
+var winattr = require("../lib");
 
-var describe_unixOnly    = eval( !util.isWindows ? "describe" : "describe.skip" );
-var describe_windowsOnly = eval(  util.isWindows ? "describe" : "describe.skip" );
+var describe_unixOnly    = !util.isWindows ? describe : describe.skip;
+var describe_windowsOnly =  util.isWindows ? describe : describe.skip;
 
 var libs = ["exec","native"];
 
@@ -116,6 +117,20 @@ describe_windowsOnly("Windows", function()
 						expect(result.readonly).to.be.true;
 						expect(result.system).to.be.true;
 						done();
+					});
+				});
+				
+				it("should bail if non-existent", function(done)
+				{
+					winattr.set("./fake-file", {readonly:true}, function(setError, setResult)
+					{
+						expect(setError).to.be.not.null;
+						
+						winattr.get("./fake-file", function(getError, getResult)
+						{
+							expect(getError).to.be.not.null;
+							done();
+						});
 					});
 				});
 			});

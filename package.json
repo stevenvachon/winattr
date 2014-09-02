@@ -1,7 +1,7 @@
 {
   "name": "winattr",
   "description": "Windows file attributes.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "homepage": "https://github.com/stevenvachon/winattr",
   "author": {
     "name": "Steven Vachon",
@@ -16,12 +16,18 @@
   "bugs": {
     "url": "https://github.com/stevenvachon/winattr/issues"
   },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/mit-license.php"
+    }
+  ],
   "dependencies": {
-    "fswin-binary": "~0.1"
+    "fswin": "2.14.1024"
   },
   "devDependencies": {
     "chai": "^1.9",
-    "mocha": "^1.21",
+    "mocha": "^2.0",
     "object.assign": "^1.0"
   },
   "engines": {
