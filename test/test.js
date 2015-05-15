@@ -36,6 +36,9 @@ describe_unixOnly("Unix", function()
 
 describe_windowsOnly("Windows", function()
 {
+	// AppVeyor (non-pro) is slow
+	this.timeout(5000);
+	
 	describe("files", function()
 	{
 		libs.forEach( function(lib)

@@ -63,6 +63,7 @@ var winattr = require("winattr").useNative();
 ```
 
 ## Changelog
+* 0.2.3 specify which script engine to use in `useExec()` "mode"
 * 0.2.2 switched from `fswin.find()` to `fswin.getAttributes()` now that it's available, tested non-existent files
 * 0.2.1 nearly pointless fix
 * 0.2.0 added [fswin](https://npmjs.org/package/fswin),`useExec()`,`useNative()`
