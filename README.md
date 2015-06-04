@@ -1,4 +1,4 @@
-# winattr [![NPM Version](http://badge.fury.io/js/winattr.svg)](http://badge.fury.io/js/winattr) [![Build Status](https://secure.travis-ci.org/stevenvachon/winattr.svg)](http://travis-ci.org/stevenvachon/winattr) [![Build status](https://ci.appveyor.com/api/projects/status/ycr7q9krha8cjojx)](https://ci.appveyor.com/project/stevenvachon/winattr) [![Dependency Status](https://david-dm.org/stevenvachon/winattr.svg)](https://david-dm.org/stevenvachon/winattr)
+# winattr [![NPM Version][npm-image]][npm-url] [![Linux Build][travis-image]][travis-url] [![Windows Build][appveyor-image]][appveyor-url] [![Dependency Status][david-image]][david-url]
 
 > Windows file attributes for Node.js
 
@@ -9,6 +9,10 @@ Get and set:
 * system
 
 … on files and/or directories.
+
+A native binding is used, offering great performance. As a contingency in case that fails, functionality will silently revert to a command line, though it is considerably slower.
+
+Note: The binding does not currently work in any version of io.js
 
 ## Getting Started
 
@@ -23,13 +27,21 @@ npm install winattr --save-dev
 
 #### get(path, callback)
 `path` - Path to file or directory  
-`callback(err,data)` - A callback which is called upon completion  
+`callback(err,attrs)` - A callback which is called upon completion  
 ```js
-var winattr = require("winattr");
-
-winattr.get("path/to/file.ext", function(err, data) {
-	console.log(data);
+winattr.get("path/to/file.ext", function(err, attrs) {
+	if (err==null) console.log(attrs);
 });
+```
+
+#### getSync(path)
+`path` - Path to file or directory  
+
+Returns an `Object` or throws an error if the file or dir cannot be found/accessed.
+```js
+var attrs = winattr.getSync("path/to/file.ext");
+
+console.log(attrs);
 ```
 
 #### set(path, attrs, callback)
@@ -37,32 +49,26 @@ winattr.get("path/to/file.ext", function(err, data) {
 `attrs` - An object containing attributes to change  
 `callback(err)` - A callback which is called upon completion  
 ```js
-var winattr = require("winattr");
-
 winattr.set("path/to/folder/", {readonly:true}, function(err) {
-	if (!err) console.log("success");
+	if (err==null) console.log("success");
 });
 ```
 
-#### useExec()
-Switch back from using the native binding in case of error (most likely caused by V8 API changes). This is loaded by default.  
-```js
-var winattr = require("winattr");
+#### setSync(path, attrs)
+`path` - Path to file or directory  
+`attrs` - An object containing attributes to change  
 
-try {
-	winattr.useNative();
-} catch (err) {
-	winattr.useExec();
-}
+Throws an error if the file or dir cannot be found/accessed.
+```js
+winattr.setSync("path/to/folder/", {readonly:true});
 ```
 
-#### useNative()
-Use native binding offering **far greater performance** over the default `useExec()`.  
-```js
-var winattr = require("winattr").useNative();
-```
 
 ## Changelog
+* 1.0.0
+  * added `getSync()`,`setSync()`
+  * removed `useExec()`,`useNative()`
+  * uses binding by default, with auto-fallback to shell
 * 0.2.3 specify which script engine to use in `useExec()` "mode"
 * 0.2.2 switched from `fswin.find()` to `fswin.getAttributes()` now that it's available, tested non-existent files
 * 0.2.1 nearly pointless fix
@@ -70,3 +76,13 @@ var winattr = require("winattr").useNative();
 * 0.1.2 tested on Windows
 * 0.1.1 package.json optimization
 * 0.1.0 initial release
+
+
+[npm-image]: https://img.shields.io/npm/v/winattr.svg
+[npm-url]: https://npmjs.org/package/winattr
+[travis-image]: https://img.shields.io/travis/stevenvachon/winattr.svg?label=linux
+[travis-url]: https://travis-ci.org/stevenvachon/winattr
+[appveyor-image]: https://img.shields.io/appveyor/ci/stevenvachon/winattr.svg?label=windows
+[appveyor-url]: https://ci.appveyor.com/project/stevenvachon/winattr
+[david-image]: https://img.shields.io/david/stevenvachon/winattr.svg
+[david-url]: https://david-dm.org/stevenvachon/winattr

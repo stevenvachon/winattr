@@ -1,9 +1,12 @@
+"use strict";
 var fs = require("fs");
-var resolve = require("path").resolve;
+var objectAssign = require("object-assign");
+var resolvePath = require("path").resolve;
+var semver = require("semver");
 var winattr = require("../lib");
-require("object.assign").shim();
 
-var windows = process.platform.indexOf("win") == 0;
+var isNode12 = semver.gte(process.version, "0.12.0");
+var isWindows = process.platform.indexOf("win") === 0;
 
 
 
@@ -13,7 +16,7 @@ function allAttribs()
 	
 	for (var i in all)
 	{
-		if (all[i]===false)
+		if (all[i] === false)
 		{
 			all[i] = true;
 		}
@@ -34,22 +37,22 @@ function defaultAttribs(overrides)
 		system: false
 	};
 	
-	return overrides ? Object.assign(defaults,overrides) : defaults;
+	return (overrides!=null) ? objectAssign(defaults,overrides) : defaults;
 }
 
 
 
-function newFile(path, attrs1, lib, callback)
+function newFile(path, attrs, lib, callback)
 {
-	path = resolve(__dirname, path);
+	path = resolvePath(__dirname, path);
 	
 	fs.writeFile(path, "", function(writeError)
 	{
-		if (writeError) return callback(writeError);
+		if (writeError!=null) return callback(writeError);
 		
 		switchLib(lib);
 		
-		setget(path, attrs1, function(setgetError, attrs)
+		setget(path, attrs, function(setgetError, attrs)
 		{
 			// Set attributes to false to avoid EPERM issues when deleting
 			winattr.set(path, defaultAttribs(), function(winattrError)
@@ -66,13 +69,46 @@ function newFile(path, attrs1, lib, callback)
 
 
 
+function newFileSync(path, attrs, lib)
+{
+	var attrs;
+	
+	path = resolvePath(__dirname, path);
+	
+	fs.writeFileSync(path, "");
+	
+	try
+	{
+		switchLib(lib);
+		
+		attrs = setgetSync(path, attrs);
+		
+		// Set attributes to false to avoid EPERM issues when deleting
+		winattr.setSync( path, defaultAttribs() );
+	}
+	catch (error)
+	{
+		// Remove test file
+		fs.unlinkSync(path);
+		
+		throw error;
+	}
+	
+	// Remove test file
+	fs.unlinkSync(path);
+	
+	return attrs;
+}
+
+
+
 function newFolder(path, attrs, lib, callback)
 {
-	path = resolve(__dirname, path);
+	path = resolvePath(__dirname, path);
 	
 	fs.mkdir(path, function(mkError)
 	{
-		if (mkError) return callback(mkError);
+		if (mkError!=null) return callback(mkError);
 		
 		switchLib(lib);
 		
@@ -93,14 +129,56 @@ function newFolder(path, attrs, lib, callback)
 
 
 
+function newFolderSync(path, attrs, lib)
+{
+	var attrs;
+	
+	path = resolvePath(__dirname, path);
+	
+	fs.mkdirSync(path);
+	
+	try
+	{
+		switchLib(lib);
+		
+		attrs = setgetSync(path, attrs);
+		
+		// Set attributes to false to avoid EPERM issues when deleting
+		winattr.setSync( path, defaultAttribs() );
+	}
+	catch (error)
+	{
+		// Remove test dir
+		fs.rmdirSync(path);
+		
+		throw error;
+	}
+	
+	// Remove test dir
+	fs.rmdirSync(path);
+	
+	return attrs;
+}
+
+
+
 function setget(path, attrs, callback)
 {
 	winattr.set(path, attrs, function(error)
 	{
-		if (error) return callback(error);
+		if (error!=null) return callback(error);
 		
 		winattr.get(path, callback);
 	});
+}
+
+
+
+function setgetSync(path, attrs)
+{
+	winattr.setSync(path, attrs);
+	
+	return winattr.getSync(path);
 }
 
 
@@ -109,15 +187,15 @@ function switchLib(lib)
 {
 	switch (lib)
 	{
-		case "":
-		case "exec":
+		case "auto":
+		case "shell":
 		{
-			winattr.useExec();
+			winattr.change(lib);
 			break;
 		}
-		case "native":
+		case "binding":
 		{
-			winattr.useNative();
+			winattr.change(lib, true);
 			break;
 		}
 	}
@@ -127,9 +205,12 @@ function switchLib(lib)
 
 module.exports =
 {
-	allAttribs: allAttribs,
+	allAttribs:     allAttribs,
 	defaultAttribs: defaultAttribs,
-	isWindows: windows,
-	newFile: newFile,
-	newFolder: newFolder
+	isNode12:       isNode12,
+	isWindows:      isWindows,
+	newFile:        newFile,
+	newFileSync:    newFileSync,
+	newFolder:      newFolder,
+	newFolderSync:  newFolderSync
 };
