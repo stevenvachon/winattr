@@ -12,13 +12,11 @@ Get and set:
 
 A native binding is used, offering great performance. As a contingency in case that fails, functionality will silently revert to a command line, though it is considerably slower.
 
-Note: The binding does not currently work in any version of io.js
-
 ## Getting Started
 
 It may go without saying, but this library is not intended to run on anything other than Windows.
 
-[Node.js](http://nodejs.org/) `~0.10` is required. To install, type this at the command line:
+[Node.js](http://nodejs.org/) `>= 0.10` is required. To install, type this at the command line:
 ```
 npm install winattr --save-dev
 ```
@@ -65,6 +63,7 @@ winattr.setSync("path/to/folder/", {readonly:true});
 
 
 ## Changelog
+* 1.1.0 added binding support to Node.js v4
 * 1.0.0
   * added `getSync()`,`setSync()`
   * removed `useExec()`,`useNative()`
