@@ -1,38 +1,40 @@
 # winattr [![NPM Version][npm-image]][npm-url] [![Linux Build][travis-image]][travis-url] [![Windows Build][appveyor-image]][appveyor-url] [![Dependency Status][david-image]][david-url]
 
-> Windows file attributes for Node.js
+> Foolproof Windows® file attributes for Node.js
 
 Get and set:
-* archive
-* hidden
-* readonly
-* system
+* `archive`
+* `hidden`
+* `readonly`
+* `system`
 
 … on files and/or directories.
 
 A native binding is used, offering great performance. As a contingency in case that fails, functionality will silently revert to a command line, though it is considerably slower.
 
-## Getting Started
+
+## Installation
 
 It may go without saying, but this library is not intended to run on anything other than Windows.
 
-[Node.js](http://nodejs.org/) `>= 0.10` is required. To install, type this at the command line:
+[Node.js](http://nodejs.org/) `>= 4` is required. To install, type this at the command line:
 ```
-npm install winattr --save-dev
+npm install winattr
 ```
 
-### Methods
 
-#### get(path, callback)
+## Methods
+
+### `get(path, callback)`
 `path` - Path to file or directory  
 `callback(err,attrs)` - A callback which is called upon completion  
 ```js
 winattr.get("path/to/file.ext", function(err, attrs) {
-	if (err==null) console.log(attrs);
+	if (err == null) console.log(attrs);
 });
 ```
 
-#### getSync(path)
+### `getSync(path)`
 `path` - Path to file or directory  
 
 Returns an `Object` or throws an error if the file or dir cannot be found/accessed.
@@ -42,17 +44,17 @@ var attrs = winattr.getSync("path/to/file.ext");
 console.log(attrs);
 ```
 
-#### set(path, attrs, callback)
+### `set(path, attrs, callback)`
 `path` - Path to file or directory  
 `attrs` - An object containing attributes to change  
 `callback(err)` - A callback which is called upon completion  
 ```js
 winattr.set("path/to/folder/", {readonly:true}, function(err) {
-	if (err==null) console.log("success");
+	if (err == null) console.log("success");
 });
 ```
 
-#### setSync(path, attrs)
+### `setSync(path, attrs)`
 `path` - Path to file or directory  
 `attrs` - An object containing attributes to change  
 
@@ -63,6 +65,7 @@ winattr.setSync("path/to/folder/", {readonly:true});
 
 
 ## Changelog
+* 2.0.0 removed support for Node.js v0.10 and v0.12
 * 1.1.0 added binding support to Node.js v4
 * 1.0.0
   * added `getSync()`,`setSync()`

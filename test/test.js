@@ -1,15 +1,12 @@
 "use strict";
-var expect  = require("chai").expect;
-var util    = require("./util");
-var winattr = require("../lib");
+const expect  = require("chai").expect;
+const helpers = require("./helpers");
+const winattr = require("../lib");
 
-var describe_unixOnly    = util.isWindows===false ? describe : describe.skip;
-var describe_windowsOnly = util.isWindows===true  ? describe : describe.skip;
+const describe_unixOnly    = helpers.isWindows===false ? describe : describe.skip;
+const describe_windowsOnly = helpers.isWindows===true  ? describe : describe.skip;
 
-var describe_node12only = util.isNode12===true ? describe : describe.skip;
-var it_node12only       = util.isNode12===true ? it       : it.skip;
-
-var modes = ["shell","auto","binding"];
+const modes = ["shell", "auto", "binding"];
 
 
 
@@ -17,18 +14,13 @@ describe_unixOnly("Unix", function()
 {
 	modes.forEach( function(mode)
 	{
-		// Node 0.10 has no synchronous shell functions
-		var it_maySkip = (mode==="shell" || mode==="auto") ? it_node12only : it;
-		
-		
-		
 		describe('with "'+mode+' mode"', function()
 		{
 			describe("accessing files", function()
 			{
 				it("should not work asynchronously", function(done)
 				{
-					util.newFile("normal.txt", util.defaultAttribs(), mode, function(error, result)
+					helpers.newFile("normal.txt", helpers.defaultAttribs(), mode, function(error, result)
 					{
 						expect(error).to.be.instanceOf(Error);
 						expect(error.message).to.contain("Windows");
@@ -36,11 +28,11 @@ describe_unixOnly("Unix", function()
 					});
 				});
 				
-				it_maySkip("should not work synchronously", function(done)
+				it("should not work synchronously", function(done)
 				{
 					try
 					{
-						util.newFileSync("normal.txt", util.defaultAttribs(), mode);
+						helpers.newFileSync("normal.txt", helpers.defaultAttribs(), mode);
 						
 						done( new Error("this should not have been called") );
 					}
@@ -59,7 +51,7 @@ describe_unixOnly("Unix", function()
 			{
 				it("should not work asynchronously", function(done)
 				{
-					util.newFolder("normal", util.defaultAttribs(), mode, function(error, result)
+					helpers.newFolder("normal", helpers.defaultAttribs(), mode, function(error, result)
 					{
 						expect(error).to.be.instanceOf(Error);
 						expect(error.message).to.contain("Windows");
@@ -67,11 +59,11 @@ describe_unixOnly("Unix", function()
 					});
 				});
 				
-				it_maySkip("should not work synchronously", function(done)
+				it("should not work synchronously", function(done)
 				{
 					try
 					{
-						util.newFolderSync("normal", util.defaultAttribs(), mode);
+						helpers.newFolderSync("normal", helpers.defaultAttribs(), mode);
 						
 						done( new Error("this should not have been called") );
 					}
@@ -99,11 +91,6 @@ describe_windowsOnly("Windows", function()
 	
 	modes.forEach( function(mode)
 	{
-		// Node 0.10 has no synchronous shell functions
-		var describe_maySkip = (mode==="shell" || mode==="auto") ? describe_node12only : describe;
-		
-		
-		
 		describe('with "'+mode+' mode"', function()
 		{
 			describe("accessing files", function()
@@ -112,7 +99,7 @@ describe_windowsOnly("Windows", function()
 				{
 					it("should set to nothing", function(done)
 					{
-						util.newFile("normal.txt", util.defaultAttribs(), mode, function(error, result)
+						helpers.newFile("normal.txt", helpers.defaultAttribs(), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -125,7 +112,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to archive", function(done)
 					{
-						util.newFile("archive.txt", util.defaultAttribs({archive:true}), mode, function(error, result)
+						helpers.newFile("archive.txt", helpers.defaultAttribs({archive:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.true;
@@ -138,7 +125,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to hidden", function(done)
 					{
-						util.newFile("hidden.txt", util.defaultAttribs({hidden:true}), mode, function(error, result)
+						helpers.newFile("hidden.txt", helpers.defaultAttribs({hidden:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -151,7 +138,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to readonly", function(done)
 					{
-						util.newFile("readonly.txt", util.defaultAttribs({readonly:true}), mode, function(error, result)
+						helpers.newFile("readonly.txt", helpers.defaultAttribs({readonly:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -164,7 +151,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to system", function(done)
 					{
-						util.newFile("system.txt", util.defaultAttribs({system:true}), mode, function(error, result)
+						helpers.newFile("system.txt", helpers.defaultAttribs({system:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -177,7 +164,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set all attributes", function(done)
 					{
-						util.newFile("all.txt", util.allAttribs(), mode, function(error, result)
+						helpers.newFile("all.txt", helpers.allAttribs(), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.true;
@@ -201,15 +188,17 @@ describe_windowsOnly("Windows", function()
 							});
 						});
 					});
+					
+					// TODO :: should support "/" and "\" dir separators
 				});
 				
 				
 				
-				describe_maySkip("synchronously", function()
+				describe("synchronously", function()
 				{
 					it("should set to nothing", function(done)
 					{
-						var result = util.newFileSync("normal.txt", util.defaultAttribs(), mode);
+						const result = helpers.newFileSync("normal.txt", helpers.defaultAttribs(), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -220,7 +209,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to archive", function(done)
 					{
-						var result = util.newFileSync("archive.txt", util.defaultAttribs({archive:true}), mode);
+						const result = helpers.newFileSync("archive.txt", helpers.defaultAttribs({archive:true}), mode);
 						
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.false;
@@ -231,7 +220,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to hidden", function(done)
 					{
-						var result = util.newFileSync("hidden.txt", util.defaultAttribs({hidden:true}), mode);
+						const result = helpers.newFileSync("hidden.txt", helpers.defaultAttribs({hidden:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.true;
@@ -242,7 +231,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to readonly", function(done)
 					{
-						var result = util.newFileSync("readonly.txt", util.defaultAttribs({readonly:true}), mode);
+						const result = helpers.newFileSync("readonly.txt", helpers.defaultAttribs({readonly:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -253,7 +242,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to system", function(done)
 					{
-						var result = util.newFileSync("system.txt", util.defaultAttribs({system:true}), mode);
+						const result = helpers.newFileSync("system.txt", helpers.defaultAttribs({system:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -264,7 +253,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set all attributes", function(done)
 					{
-						var result = util.newFileSync("all.txt", util.allAttribs(), mode);
+						const result = helpers.newFileSync("all.txt", helpers.allAttribs(), mode);
 						
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.true;
@@ -310,7 +299,7 @@ describe_windowsOnly("Windows", function()
 				{
 					it("should set to nothing", function(done)
 					{
-						util.newFolder("normal", util.defaultAttribs(), mode, function(error, result)
+						helpers.newFolder("normal", helpers.defaultAttribs(), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -323,7 +312,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to archive", function(done)
 					{
-						util.newFolder("archive", util.defaultAttribs({archive:true}), mode, function(error, result)
+						helpers.newFolder("archive", helpers.defaultAttribs({archive:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.true;
@@ -336,7 +325,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to hidden", function(done)
 					{
-						util.newFolder("hidden", util.defaultAttribs({hidden:true}), mode, function(error, result)
+						helpers.newFolder("hidden", helpers.defaultAttribs({hidden:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -349,7 +338,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to readonly", function(done)
 					{
-						util.newFolder("readonly", util.defaultAttribs({readonly:true}), mode, function(error, result)
+						helpers.newFolder("readonly", helpers.defaultAttribs({readonly:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -362,7 +351,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to system", function(done)
 					{
-						util.newFolder("system", util.defaultAttribs({system:true}), mode, function(error, result)
+						helpers.newFolder("system", helpers.defaultAttribs({system:true}), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.false;
@@ -375,7 +364,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set all attributes", function(done)
 					{
-						util.newFolder("all", util.allAttribs(), mode, function(error, result)
+						helpers.newFolder("all", helpers.allAttribs(), mode, function(error, result)
 						{
 							if (error!==null) throw error;
 							expect(result.archive).to.be.true;
@@ -389,11 +378,11 @@ describe_windowsOnly("Windows", function()
 				
 				
 				
-				describe_maySkip("synchronously", function()
+				describe("synchronously", function()
 				{
 					it("should set to nothing", function(done)
 					{
-						var result = util.newFolderSync("normal", util.defaultAttribs(), mode);
+						const result = helpers.newFolderSync("normal", helpers.defaultAttribs(), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -404,7 +393,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to archive", function(done)
 					{
-						var result = util.newFolderSync("archive", util.defaultAttribs({archive:true}), mode);
+						const result = helpers.newFolderSync("archive", helpers.defaultAttribs({archive:true}), mode);
 						
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.false;
@@ -415,7 +404,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to hidden", function(done)
 					{
-						var result = util.newFolderSync("hidden", util.defaultAttribs({hidden:true}), mode);
+						const result = helpers.newFolderSync("hidden", helpers.defaultAttribs({hidden:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.true;
@@ -426,7 +415,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to readonly", function(done)
 					{
-						var result = util.newFolderSync("readonly", util.defaultAttribs({readonly:true}), mode);
+						const result = helpers.newFolderSync("readonly", helpers.defaultAttribs({readonly:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -437,7 +426,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set to system", function(done)
 					{
-						var result = util.newFolderSync("system", util.defaultAttribs({system:true}), mode);
+						const result = helpers.newFolderSync("system", helpers.defaultAttribs({system:true}), mode);
 						
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
@@ -448,7 +437,7 @@ describe_windowsOnly("Windows", function()
 					
 					it("should set all attributes", function(done)
 					{
-						var result = util.newFolderSync("all", util.allAttribs(), mode);
+						const result = helpers.newFolderSync("all", helpers.allAttribs(), mode);
 						
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.true;

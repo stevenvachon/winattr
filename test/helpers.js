@@ -1,20 +1,17 @@
 "use strict";
-var fs = require("fs");
-var objectAssign = require("object-assign");
-var resolvePath = require("path").resolve;
-var semver = require("semver");
-var winattr = require("../lib");
+const fs = require("fs");
+const resolvePath = require("path").resolve;
+const winattr = require("../lib");
 
-var isNode12 = semver.gte(process.version, "0.12.0");
-var isWindows = process.platform.indexOf("win") === 0;
+const isWindows = process.platform.indexOf("win") === 0;
 
 
 
 function allAttribs()
 {
-	var all = defaultAttribs();
+	const all = defaultAttribs();
 	
-	for (var i in all)
+	for (let i in all)
 	{
 		if (all[i] === false)
 		{
@@ -29,7 +26,7 @@ function allAttribs()
 
 function defaultAttribs(overrides)
 {
-	var defaults =
+	const defaults =
 	{
 		archive: false,
 		hidden: false,
@@ -37,7 +34,7 @@ function defaultAttribs(overrides)
 		system: false
 	};
 	
-	return (overrides!=null) ? objectAssign(defaults,overrides) : defaults;
+	return (overrides!=null) ? Object.assign(defaults,overrides) : defaults;
 }
 
 
@@ -207,7 +204,6 @@ module.exports =
 {
 	allAttribs:     allAttribs,
 	defaultAttribs: defaultAttribs,
-	isNode12:       isNode12,
 	isWindows:      isWindows,
 	newFile:        newFile,
 	newFileSync:    newFileSync,
