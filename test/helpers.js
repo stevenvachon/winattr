@@ -1,16 +1,16 @@
 "use strict";
 const fs = require("fs");
-const resolvePath = require("path").resolve;
+const {resolve: resolvePath} = require("path");
 const winattr = require("../lib");
 
-const isWindows = process.platform.indexOf("win") === 0;
+const isWindows = process.platform.startsWith("win");
 
 
 
-function allAttribs()
+const allAttribs = () =>
 {
 	const all = defaultAttribs();
-	
+
 	for (let i in all)
 	{
 		if (all[i] === false)
@@ -18,13 +18,13 @@ function allAttribs()
 			all[i] = true;
 		}
 	}
-	
+
 	return all;
-}
+};
 
 
 
-function defaultAttribs(overrides)
+const defaultAttribs = overrides =>
 {
 	const defaults =
 	{
@@ -33,53 +33,53 @@ function defaultAttribs(overrides)
 		readonly: false,
 		system: false
 	};
-	
+
 	return (overrides!=null) ? Object.assign(defaults,overrides) : defaults;
-}
+};
 
 
 
-function newFile(path, attrs, lib, callback)
+const newFile = (path, attrs, lib, callback) =>
 {
 	path = resolvePath(__dirname, path);
-	
-	fs.writeFile(path, "", function(writeError)
+
+	fs.writeFile(path, "", writeError =>
 	{
 		if (writeError!=null) return callback(writeError);
-		
+
 		switchLib(lib);
-		
-		setget(path, attrs, function(setgetError, attrs)
+
+		setget(path, attrs, (setgetError, attrs) =>
 		{
 			// Set attributes to false to avoid EPERM issues when deleting
-			winattr.set(path, defaultAttribs(), function(winattrError)
+			winattr.set(path, defaultAttribs(), winattrError =>
 			{
 				// Remove test file
-				fs.unlink(path, function(unlinkError)
+				fs.unlink(path, unlinkError =>
 				{
 					callback(unlinkError || winattrError || setgetError || null, attrs);
 				});
 			});
 		});
 	});
-}
+};
 
 
 
-function newFileSync(path, attrs, lib)
+const newFileSync = (path, attrs, lib) =>
 {
 	var attrs;
-	
+
 	path = resolvePath(__dirname, path);
-	
+
 	fs.writeFileSync(path, "");
-	
+
 	try
 	{
 		switchLib(lib);
-		
+
 		attrs = setgetSync(path, attrs);
-		
+
 		// Set attributes to false to avoid EPERM issues when deleting
 		winattr.setSync( path, defaultAttribs() );
 	}
@@ -87,59 +87,59 @@ function newFileSync(path, attrs, lib)
 	{
 		// Remove test file
 		fs.unlinkSync(path);
-		
+
 		throw error;
 	}
-	
+
 	// Remove test file
 	fs.unlinkSync(path);
-	
+
 	return attrs;
-}
+};
 
 
 
-function newFolder(path, attrs, lib, callback)
+const newFolder = (path, attrs, lib, callback) =>
 {
 	path = resolvePath(__dirname, path);
-	
-	fs.mkdir(path, function(mkError)
+
+	fs.mkdir(path, mkError =>
 	{
 		if (mkError!=null) return callback(mkError);
-		
+
 		switchLib(lib);
-		
-		setget(path, attrs, function(setgetError, attrs)
+
+		setget(path, attrs, (setgetError, attrs) =>
 		{
 			// Set attributes to false to avoid EPERM issues when deleting
-			winattr.set(path, defaultAttribs(), function(winattrError)
+			winattr.set(path, defaultAttribs(), winattrError =>
 			{
 				// Remove test dir
-				fs.rmdir(path, function(rmError)
+				fs.rmdir(path, rmError =>
 				{
 					callback(rmError || winattrError || setgetError || null, attrs);
 				});
 			});
 		});
 	});
-}
+};
 
 
 
-function newFolderSync(path, attrs, lib)
+const newFolderSync = (path, attrs, lib) =>
 {
 	var attrs;
-	
+
 	path = resolvePath(__dirname, path);
-	
+
 	fs.mkdirSync(path);
-	
+
 	try
 	{
 		switchLib(lib);
-		
+
 		attrs = setgetSync(path, attrs);
-		
+
 		// Set attributes to false to avoid EPERM issues when deleting
 		winattr.setSync( path, defaultAttribs() );
 	}
@@ -147,40 +147,40 @@ function newFolderSync(path, attrs, lib)
 	{
 		// Remove test dir
 		fs.rmdirSync(path);
-		
+
 		throw error;
 	}
-	
+
 	// Remove test dir
 	fs.rmdirSync(path);
-	
+
 	return attrs;
-}
+};
 
 
 
-function setget(path, attrs, callback)
+const setget = (path, attrs, callback) =>
 {
-	winattr.set(path, attrs, function(error)
+	winattr.set(path, attrs, error =>
 	{
 		if (error!=null) return callback(error);
-		
+
 		winattr.get(path, callback);
 	});
-}
+};
 
 
 
-function setgetSync(path, attrs)
+const setgetSync = (path, attrs) =>
 {
 	winattr.setSync(path, attrs);
-	
+
 	return winattr.getSync(path);
-}
+};
 
 
 
-function switchLib(lib)
+const switchLib = lib =>
 {
 	switch (lib)
 	{
@@ -196,17 +196,17 @@ function switchLib(lib)
 			break;
 		}
 	}
-}
+};
 
 
 
 module.exports =
 {
-	allAttribs:     allAttribs,
-	defaultAttribs: defaultAttribs,
-	isWindows:      isWindows,
-	newFile:        newFile,
-	newFileSync:    newFileSync,
-	newFolder:      newFolder,
-	newFolderSync:  newFolderSync
+	allAttribs,
+	defaultAttribs,
+	isWindows,
+	newFile,
+	newFileSync,
+	newFolder,
+	newFolderSync
 };

@@ -1,82 +1,79 @@
 "use strict";
-const expect  = require("chai").expect;
-const helpers = require("./helpers");
+const {allAttribs, defaultAttribs, isWindows, newFile, newFileSync, newFolder, newFolderSync} = require("./helpers");
+const {expect}  = require("chai");
 const winattr = require("../lib");
 
-const describe_unixOnly    = helpers.isWindows===false ? describe : describe.skip;
-const describe_windowsOnly = helpers.isWindows===true  ? describe : describe.skip;
+const describe_unixOnly    = !isWindows ? describe : describe.skip;
+const describe_windowsOnly =  isWindows ? describe : describe.skip;
 
 const modes = ["shell", "auto", "binding"];
 
 
 
-describe_unixOnly("Unix", function()
+describe_unixOnly("Unix", () =>
 {
-	modes.forEach( function(mode)
+	modes.forEach(mode => describe(`with "${mode}" mode`, () =>
 	{
-		describe('with "'+mode+' mode"', function()
+		describe("accessing files", () =>
 		{
-			describe("accessing files", function()
+			it("does not work asynchronously", done =>
 			{
-				it("should not work asynchronously", function(done)
+				newFile("normal.txt", defaultAttribs(), mode, (error, result) =>
 				{
-					helpers.newFile("normal.txt", helpers.defaultAttribs(), mode, function(error, result)
-					{
-						expect(error).to.be.instanceOf(Error);
-						expect(error.message).to.contain("Windows");
-						done();
-					});
-				});
-				
-				it("should not work synchronously", function(done)
-				{
-					try
-					{
-						helpers.newFileSync("normal.txt", helpers.defaultAttribs(), mode);
-						
-						done( new Error("this should not have been called") );
-					}
-					catch (error)
-					{
-						expect(error).to.be.instanceOf(Error);
-						expect(error.message).to.contain("Windows");
-						done();
-					}
+					expect(error).to.be.instanceOf(Error);
+					expect(error.message).to.contain("Windows");
+					done();
 				});
 			});
-			
-			
-			
-			describe("accessing folders", function()
+
+			it("does not work synchronously", done =>
 			{
-				it("should not work asynchronously", function(done)
+				try
 				{
-					helpers.newFolder("normal", helpers.defaultAttribs(), mode, function(error, result)
-					{
-						expect(error).to.be.instanceOf(Error);
-						expect(error.message).to.contain("Windows");
-						done();
-					});
-				});
-				
-				it("should not work synchronously", function(done)
+					newFileSync("normal.txt", defaultAttribs(), mode);
+
+					done( new Error("this should not have been called") );
+				}
+				catch (error)
 				{
-					try
-					{
-						helpers.newFolderSync("normal", helpers.defaultAttribs(), mode);
-						
-						done( new Error("this should not have been called") );
-					}
-					catch (error)
-					{
-						expect(error).to.be.instanceOf(Error);
-						expect(error.message).to.contain("Windows");
-						done();
-					}	
-				});
+					expect(error).to.be.instanceOf(Error);
+					expect(error.message).to.contain("Windows");
+					done();
+				}
 			});
 		});
-	});
+
+
+
+		describe("accessing folders", () =>
+		{
+			it("does not work asynchronously", done =>
+			{
+				newFolder("normal", defaultAttribs(), mode, (error, result) =>
+				{
+					expect(error).to.be.instanceOf(Error);
+					expect(error.message).to.contain("Windows");
+					done();
+				});
+			});
+
+			it("does not work synchronously", done =>
+			{
+				try
+				{
+					newFolderSync("normal", defaultAttribs(), mode);
+
+					done( new Error("this should not have been called") );
+				}
+				catch (error)
+				{
+					expect(error).to.be.instanceOf(Error);
+					expect(error.message).to.contain("Windows");
+					done();
+				}
+			});
+		});
+	}));
 });
 
 
@@ -86,367 +83,351 @@ describe_windowsOnly("Windows", function()
 {
 	// AppVeyor (non-pro) is slow
 	this.timeout(5000);
-	
-	
-	
-	modes.forEach( function(mode)
+
+
+
+	modes.forEach(mode => describe(`with "${mode}" mode`, () =>
 	{
-		describe('with "'+mode+' mode"', function()
+		describe("accessing files", () =>
 		{
-			describe("accessing files", function()
+			describe("asynchronously", () =>
 			{
-				describe("asynchronously", function()
+				it("sets to nothing", done =>
 				{
-					it("should set to nothing", function(done)
+					newFile("normal.txt", defaultAttribs(), mode, (error, result) =>
 					{
-						helpers.newFile("normal.txt", helpers.defaultAttribs(), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
+						if (error!==null) throw error;
+						expect(result.archive).to.be.false;
+						expect(result.hidden).to.be.false;
+						expect(result.readonly).to.be.false;
+						expect(result.system).to.be.false;
+						done();
 					});
-					
-					it("should set to archive", function(done)
-					{
-						helpers.newFile("archive.txt", helpers.defaultAttribs({archive:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.true;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to hidden", function(done)
-					{
-						helpers.newFile("hidden.txt", helpers.defaultAttribs({hidden:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.true;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to readonly", function(done)
-					{
-						helpers.newFile("readonly.txt", helpers.defaultAttribs({readonly:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.true;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to system", function(done)
-					{
-						helpers.newFile("system.txt", helpers.defaultAttribs({system:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.true;
-							done();
-						});
-					});
-					
-					it("should set all attributes", function(done)
-					{
-						helpers.newFile("all.txt", helpers.allAttribs(), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.true;
-							expect(result.hidden).to.be.true;
-							expect(result.readonly).to.be.true;
-							expect(result.system).to.be.true;
-							done();
-						});
-					});
-					
-					it("should bail if non-existent", function(done)
-					{
-						winattr.set("./fake-file", {readonly:true}, function(setError, setResult)
-						{
-							expect(setError).to.be.instanceOf(Error);
-							
-							winattr.get("./fake-file", function(getError, getResult)
-							{
-								expect(getError).to.be.instanceOf(Error);
-								done();
-							});
-						});
-					});
-					
-					// TODO :: should support "/" and "\" dir separators
 				});
-				
-				
-				
-				describe("synchronously", function()
+
+				it("sets to archive", done =>
 				{
-					it("should set to nothing", function(done)
+					newFile("archive.txt", defaultAttribs({archive:true}), mode, (error, result) =>
 					{
-						const result = helpers.newFileSync("normal.txt", helpers.defaultAttribs(), mode);
-						
-						expect(result.archive).to.be.false;
-						expect(result.hidden).to.be.false;
-						expect(result.readonly).to.be.false;
-						expect(result.system).to.be.false;
-						done();
-					});
-					
-					it("should set to archive", function(done)
-					{
-						const result = helpers.newFileSync("archive.txt", helpers.defaultAttribs({archive:true}), mode);
-						
+						if (error!==null) throw error;
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.false;
 						expect(result.readonly).to.be.false;
 						expect(result.system).to.be.false;
 						done();
 					});
-					
-					it("should set to hidden", function(done)
+				});
+
+				it("sets to hidden", done =>
+				{
+					newFile("hidden.txt", defaultAttribs({hidden:true}), mode, (error, result) =>
 					{
-						const result = helpers.newFileSync("hidden.txt", helpers.defaultAttribs({hidden:true}), mode);
-						
+						if (error!==null) throw error;
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.true;
 						expect(result.readonly).to.be.false;
 						expect(result.system).to.be.false;
 						done();
 					});
-					
-					it("should set to readonly", function(done)
+				});
+
+				it("sets to readonly", done =>
+				{
+					newFile("readonly.txt", defaultAttribs({readonly:true}), mode, (error, result) =>
 					{
-						const result = helpers.newFileSync("readonly.txt", helpers.defaultAttribs({readonly:true}), mode);
-						
+						if (error!==null) throw error;
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
 						expect(result.readonly).to.be.true;
 						expect(result.system).to.be.false;
 						done();
 					});
-					
-					it("should set to system", function(done)
+				});
+
+				it("sets to system", done =>
+				{
+					newFile("system.txt", defaultAttribs({system:true}), mode, (error, result) =>
 					{
-						const result = helpers.newFileSync("system.txt", helpers.defaultAttribs({system:true}), mode);
-						
+						if (error!==null) throw error;
 						expect(result.archive).to.be.false;
 						expect(result.hidden).to.be.false;
 						expect(result.readonly).to.be.false;
 						expect(result.system).to.be.true;
 						done();
 					});
-					
-					it("should set all attributes", function(done)
+				});
+
+				it("sets all attributes", done =>
+				{
+					newFile("all.txt", allAttribs(), mode, (error, result) =>
 					{
-						const result = helpers.newFileSync("all.txt", helpers.allAttribs(), mode);
-						
+						if (error!==null) throw error;
 						expect(result.archive).to.be.true;
 						expect(result.hidden).to.be.true;
 						expect(result.readonly).to.be.true;
 						expect(result.system).to.be.true;
 						done();
 					});
-					
-					it("should bail if non-existent", function(done)
+				});
+
+				it("throws if non-existent", done =>
+				{
+					winattr.set("./fake-file", {readonly:true}, setError =>
 					{
-						var getError,setError;
-						
-						try
-						{
-							winattr.setSync("./fake-file", {readonly:true});
-						}
-						catch (error)
-						{
-							setError = error;
-						}
-						
-						try
-						{
-							winattr.getSync("./fake-file");
-						}
-						catch (error)
-						{
-							getError = error;
-						}
-						
 						expect(setError).to.be.instanceOf(Error);
-						expect(getError).to.be.instanceOf(Error);
-						done();
+
+						winattr.get("./fake-file", (getError, getResult) =>
+						{
+							expect(getError).to.be.instanceOf(Error);
+							done();
+						});
 					});
 				});
+
+				// TODO :: supports "/" and "\" dir separators
 			});
-			
-			
-			
-			describe("accessing folders", function()
+
+
+
+			describe("synchronously", () =>
 			{
-				describe("asynchronously", function()
+				it("sets to nothing", () =>
 				{
-					it("should set to nothing", function(done)
-					{
-						helpers.newFolder("normal", helpers.defaultAttribs(), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to archive", function(done)
-					{
-						helpers.newFolder("archive", helpers.defaultAttribs({archive:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.true;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to hidden", function(done)
-					{
-						helpers.newFolder("hidden", helpers.defaultAttribs({hidden:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.true;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to readonly", function(done)
-					{
-						helpers.newFolder("readonly", helpers.defaultAttribs({readonly:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.true;
-							expect(result.system).to.be.false;
-							done();
-						});
-					});
-					
-					it("should set to system", function(done)
-					{
-						helpers.newFolder("system", helpers.defaultAttribs({system:true}), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.false;
-							expect(result.hidden).to.be.false;
-							expect(result.readonly).to.be.false;
-							expect(result.system).to.be.true;
-							done();
-						});
-					});
-					
-					it("should set all attributes", function(done)
-					{
-						helpers.newFolder("all", helpers.allAttribs(), mode, function(error, result)
-						{
-							if (error!==null) throw error;
-							expect(result.archive).to.be.true;
-							expect(result.hidden).to.be.true;
-							expect(result.readonly).to.be.true;
-							expect(result.system).to.be.true;
-							done();
-						});
-					});
+					const result = newFileSync("normal.txt", defaultAttribs(), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
 				});
-				
-				
-				
-				describe("synchronously", function()
+
+				it("sets to archive", () =>
 				{
-					it("should set to nothing", function(done)
+					const result = newFileSync("archive.txt", defaultAttribs({archive:true}), mode);
+
+					expect(result.archive).to.be.true;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to hidden", () =>
+				{
+					const result = newFileSync("hidden.txt", defaultAttribs({hidden:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.true;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to readonly", () =>
+				{
+					const result = newFileSync("readonly.txt", defaultAttribs({readonly:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.true;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to system", () =>
+				{
+					const result = newFileSync("system.txt", defaultAttribs({system:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.true;
+				});
+
+				it("sets all attributes", () =>
+				{
+					const result = newFileSync("all.txt", allAttribs(), mode);
+
+					expect(result.archive).to.be.true;
+					expect(result.hidden).to.be.true;
+					expect(result.readonly).to.be.true;
+					expect(result.system).to.be.true;
+				});
+
+				it("throws if non-existent", () =>
+				{
+					var getError,setError;
+
+					try
 					{
-						const result = helpers.newFolderSync("normal", helpers.defaultAttribs(), mode);
-						
-						expect(result.archive).to.be.false;
-						expect(result.hidden).to.be.false;
-						expect(result.readonly).to.be.false;
-						expect(result.system).to.be.false;
-						done();
-					});
-					
-					it("should set to archive", function(done)
+						winattr.setSync("./fake-file", {readonly:true});
+					}
+					catch (error)
 					{
-						const result = helpers.newFolderSync("archive", helpers.defaultAttribs({archive:true}), mode);
-						
-						expect(result.archive).to.be.true;
-						expect(result.hidden).to.be.false;
-						expect(result.readonly).to.be.false;
-						expect(result.system).to.be.false;
-						done();
-					});
-					
-					it("should set to hidden", function(done)
+						setError = error;
+					}
+
+					try
 					{
-						const result = helpers.newFolderSync("hidden", helpers.defaultAttribs({hidden:true}), mode);
-						
-						expect(result.archive).to.be.false;
-						expect(result.hidden).to.be.true;
-						expect(result.readonly).to.be.false;
-						expect(result.system).to.be.false;
-						done();
-					});
-					
-					it("should set to readonly", function(done)
+						winattr.getSync("./fake-file");
+					}
+					catch (error)
 					{
-						const result = helpers.newFolderSync("readonly", helpers.defaultAttribs({readonly:true}), mode);
-						
-						expect(result.archive).to.be.false;
-						expect(result.hidden).to.be.false;
-						expect(result.readonly).to.be.true;
-						expect(result.system).to.be.false;
-						done();
-					});
-					
-					it("should set to system", function(done)
-					{
-						const result = helpers.newFolderSync("system", helpers.defaultAttribs({system:true}), mode);
-						
-						expect(result.archive).to.be.false;
-						expect(result.hidden).to.be.false;
-						expect(result.readonly).to.be.false;
-						expect(result.system).to.be.true;
-						done();
-					});
-					
-					it("should set all attributes", function(done)
-					{
-						const result = helpers.newFolderSync("all", helpers.allAttribs(), mode);
-						
-						expect(result.archive).to.be.true;
-						expect(result.hidden).to.be.true;
-						expect(result.readonly).to.be.true;
-						expect(result.system).to.be.true;
-						done();
-					});
+						getError = error;
+					}
+
+					expect(setError).to.be.instanceOf(Error);
+					expect(getError).to.be.instanceOf(Error);
 				});
 			});
 		});
-	});
+
+
+
+		describe("accessing folders", () =>
+		{
+			describe("asynchronously", () =>
+			{
+				it("sets to nothing", done =>
+				{
+					newFolder("normal", defaultAttribs(), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.false;
+						expect(result.hidden).to.be.false;
+						expect(result.readonly).to.be.false;
+						expect(result.system).to.be.false;
+						done();
+					});
+				});
+
+				it("sets to archive", done =>
+				{
+					newFolder("archive", defaultAttribs({archive:true}), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.true;
+						expect(result.hidden).to.be.false;
+						expect(result.readonly).to.be.false;
+						expect(result.system).to.be.false;
+						done();
+					});
+				});
+
+				it("sets to hidden", done =>
+				{
+					newFolder("hidden", defaultAttribs({hidden:true}), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.false;
+						expect(result.hidden).to.be.true;
+						expect(result.readonly).to.be.false;
+						expect(result.system).to.be.false;
+						done();
+					});
+				});
+
+				it("sets to readonly", done =>
+				{
+					newFolder("readonly", defaultAttribs({readonly:true}), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.false;
+						expect(result.hidden).to.be.false;
+						expect(result.readonly).to.be.true;
+						expect(result.system).to.be.false;
+						done();
+					});
+				});
+
+				it("sets to system", done =>
+				{
+					newFolder("system", defaultAttribs({system:true}), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.false;
+						expect(result.hidden).to.be.false;
+						expect(result.readonly).to.be.false;
+						expect(result.system).to.be.true;
+						done();
+					});
+				});
+
+				it("sets all attributes", done =>
+				{
+					newFolder("all", allAttribs(), mode, (error, result) =>
+					{
+						if (error!==null) throw error;
+						expect(result.archive).to.be.true;
+						expect(result.hidden).to.be.true;
+						expect(result.readonly).to.be.true;
+						expect(result.system).to.be.true;
+						done();
+					});
+				});
+			});
+
+
+
+			describe("synchronously", () =>
+			{
+				it("sets to nothing", () =>
+				{
+					const result = newFolderSync("normal", defaultAttribs(), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to archive", () =>
+				{
+					const result = newFolderSync("archive", defaultAttribs({archive:true}), mode);
+
+					expect(result.archive).to.be.true;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to hidden", () =>
+				{
+					const result = newFolderSync("hidden", defaultAttribs({hidden:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.true;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to readonly", () =>
+				{
+					const result = newFolderSync("readonly", defaultAttribs({readonly:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.true;
+					expect(result.system).to.be.false;
+				});
+
+				it("sets to system", () =>
+				{
+					const result = newFolderSync("system", defaultAttribs({system:true}), mode);
+
+					expect(result.archive).to.be.false;
+					expect(result.hidden).to.be.false;
+					expect(result.readonly).to.be.false;
+					expect(result.system).to.be.true;
+				});
+
+				it("sets all attributes", () =>
+				{
+					const result = newFolderSync("all", allAttribs(), mode);
+
+					expect(result.archive).to.be.true;
+					expect(result.hidden).to.be.true;
+					expect(result.readonly).to.be.true;
+					expect(result.system).to.be.true;
+				});
+			});
+		});
+	}));
 });
