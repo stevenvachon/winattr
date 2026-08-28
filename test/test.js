@@ -1,6 +1,10 @@
 "use strict";
 const {allAttribs, defaultAttribs, isWindows, newFile, newFileSync, newFolder, newFolderSync} = require("./helpers");
+const child_process = require("child_process");
+const {EventEmitter} = require("events");
 const {expect}  = require("chai");
+const Module = require("module");
+const whichLib = require("../lib/whichLib");
 const winattr = require("../lib");
 
 const describe_unixOnly    = !isWindows ? describe : describe.skip;
@@ -429,4 +433,156 @@ describe_windowsOnly("Windows", function()
 			});
 		});
 	}));
+
+
+
+	describe("binding load failure", () =>
+	{
+		class BindingError extends Error
+		{
+			constructor(message)
+			{
+				super(message);
+				this.name = this.constructor.name;
+				Error.captureStackTrace(this, this.constructor);
+			}
+		}
+
+		const withBrokenBinding = callback =>
+		{
+			const load = Module._load;
+
+			Module._load = function(request)
+			{
+				if (request === "fswin")
+				{
+					throw new BindingError();
+				}
+
+				return load.apply(this, arguments);
+			};
+
+			try
+			{
+				return callback();
+			}
+			finally
+			{
+				Module._load = load;
+			}
+		};
+
+		const reset = () =>
+		{
+			whichLib.lib.mode = null;
+			whichLib.lib.binding = null;
+			whichLib.lib.shell = null;
+			delete require.cache[require.resolve("../lib/binding")];
+		};
+
+		beforeEach(reset);
+
+		after(() =>
+		{
+			reset();
+			winattr.change("auto");
+		});
+
+
+
+		it("falls back to shell when not strict", () =>
+		{
+			withBrokenBinding(() =>
+			{
+				winattr.change("auto");
+			});
+
+			expect(whichLib.current()).to.equal(require("../lib/shell"));
+		});
+
+
+
+		it("throws when strict", () =>
+		{
+			withBrokenBinding(() =>
+			{
+				expect(() => winattr.change("binding", true)).to.throw(BindingError);
+			});
+		});
+	});
+
+
+
+	describe("cscript failure", () =>
+	{
+		const {spawn, spawnSync} = child_process;
+
+		before(() => winattr.change("shell"));
+
+		afterEach(() =>
+		{
+			child_process.spawn = spawn;
+			child_process.spawnSync = spawnSync;
+		});
+
+		after(() => winattr.change("auto"));
+
+		it("throws if get stdout is empty", () =>
+		{
+			child_process.spawnSync = () => ({ stdout: "", stderr: "", status: 0 });
+
+			expect(() => winattr.getSync("./whatever")).to.throw("unknown error");
+		});
+
+		it("calls back with an error if get stdout is empty", done =>
+		{
+			child_process.spawn = () =>
+			{
+				const instance = new EventEmitter();
+				instance.stderr = new EventEmitter();
+				instance.stdout = new EventEmitter();
+				process.nextTick(() => instance.emit("exit", 0));  // so the instance is ready for use
+				return instance;
+			};
+
+			winattr.get("./whatever", error =>
+			{
+				try
+				{
+					expect(error).to.be.instanceOf(Error);
+					expect(error).to.have.property("message", "unknown error");
+					done();
+				}
+				catch (assertError)
+				{
+					done(assertError);
+				}
+			});
+		});
+	});
+
+
+
+	describe("binding procedure failure", () =>
+	{
+		after(() => winattr.change("auto"));
+
+		it("falls back to shell", () =>
+		{
+			winattr.change("binding", true);
+
+			const result = whichLib.run(() =>
+			{
+				if (whichLib.lib.mode === "binding")
+				{
+					throw new Error("The specified procedure could not be found.");
+				}
+
+				return true;
+			});
+
+			expect(result).to.equal(true);
+			expect(whichLib.current()).to.equal(require("../lib/shell"));
+		});
+	});
 });
