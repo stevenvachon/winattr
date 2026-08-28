@@ -1,0 +1,9 @@
+{
+  "files": [],
+  // For VS Code
+  "references": [
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.check1.json" },
+    { "path": "./tsconfig.check2.json" }
+  ]
+}

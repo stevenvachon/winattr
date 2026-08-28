@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "lib": ["es5"],
+    "strict": true,
+    "useUnknownInCatchVariables": false,
+    "types": ["activex-scripting", "windows-script-host"]
+  },
+  "files": ["src/shellGetAttributes.js"]
+}

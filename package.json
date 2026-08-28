@@ -1,28 +1,43 @@
 {
   "name": "winattr",
   "description": "Foolproof Windows® file attributes.",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "license": "MIT",
   "author": "Steven Vachon <contact@svachon.com> (https://svachon.com)",
   "repository": "github:stevenvachon/winattr",
-  "main": "lib",
+  "type": "module",
+  "exports": "./dist/index.js",
   "dependencies": {
-    "fswin": "3.21.1008"
+    "fswin": "^3.25.1108",
+    "is-windows": "^1.0.2"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^6.1.4",
-    "nyc": "^14.0.0"
+    "@types/activex-scripting": "^1.0.12",
+    "@types/is-windows": "^1.0.2",
+    "@types/node": "^26.2.0",
+    "@types/windows-script-host": "^5.8.6",
+    "@vitest/coverage-v8": "^4.1.10",
+    "copyfiles": "^2.4.1",
+    "cspell": "^10.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "engines": {
-    "node": ">= 8"
+    "node": ">= 24"
   },
   "scripts": {
-    "posttest": "nyc report --reporter=text-summary --reporter=html --reporter=lcov",
-    "test": "nyc --silent mocha test/ --bail --check-leaks"
+    "build": "npm run build:spellcheck && npm run build:lint && npm run build:typecheck:supplemental && npm run build:compile",
+    "build:compile": "tsc -p tsconfig.build.json && copyfiles -u 1 'src/**/*.js' dist/",
+    "build:lint": "prettier --check '**/*.{js,json,md,ts}' '!coverage/**' '!dist/**'",
+    "build:spellcheck": "cspell '**/*.{js,json,md,ts}' '!coverage/**' '!dist/**' '!node_modules/**' --no-progress",
+    "build:typecheck:supplemental": "tsc --project tsconfig.check1.json && tsc --project tsconfig.check2.json",
+    "prepublishOnly": "npm run build && npm test",
+    "test": "npm run test:watch -- --reporter=verbose --run",
+    "test:watch": "vitest dev --coverage --coverage.exclude=test/*.ts --coverage.exclude=src/**/*.js --coverage.include=src/**/*.ts --coverage.reporter=html --coverage.reporter=lcov --coverage.reporter=text"
   },
   "files": [
-    "lib"
+    "dist"
   ],
   "keywords": [
     "attributes",

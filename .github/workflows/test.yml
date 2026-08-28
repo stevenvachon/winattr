@@ -1,8 +1,8 @@
 on:
   pull_request:
-    branches: [3.x.x]
+    branches: [main]
   push:
-    branches: [3.x.x]
+    branches: [main]
 
 jobs:
   Test:
@@ -12,17 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        node: [8, 'lts/*', latest]
-        exclude:
-          - node: 8
-            os: macos-latest # arm64 only
-          - node: 8
-            os: ubuntu-latest
+        node: [24, 'lts/*', latest]
         include:
-          - node: 8
-            os: macos-26-intel # last macos version to support x64
-          - node: 8
-            os: ubuntu-22.04
           - node: latest
             os: macos-latest
             experimental: true
