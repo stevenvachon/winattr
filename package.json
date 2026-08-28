@@ -11,7 +11,6 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "coveralls": "^3.0.3",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0"
   },
@@ -19,8 +18,7 @@
     "node": ">= 8"
   },
   "scripts": {
-    "ci": "npm run test && nyc report --reporter=text-lcov | coveralls",
-    "posttest": "nyc report --reporter=text-summary --reporter=html",
+    "posttest": "nyc report --reporter=text-summary --reporter=html --reporter=lcov",
     "test": "nyc --silent mocha test/ --bail --check-leaks"
   },
   "files": [

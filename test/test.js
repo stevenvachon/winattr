@@ -81,7 +81,6 @@ describe_unixOnly("Unix", () =>
 // NOTE :: didn't use deep.equals() because of "directory" and "symlink" keys
 describe_windowsOnly("Windows", function()
 {
-	// AppVeyor (non-pro) is slow
 	this.timeout(5000);
 
 
